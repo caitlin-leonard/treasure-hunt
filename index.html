@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Treasure Hunt</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    .form-group {
+      margin-bottom: 16px;
+    }
+    label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 4px;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 8px;
+      font-size: 16px;
+    }
+    select {
+      width: 100%;
+      padding: 8px;
+      font-size: 16px;
+    }
+    button {
+      background: #0076ff;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      font-size: 16px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #005ed1;
+    }
+  </style>
+</head>
+<body>
+  <h1>Treasure Hunt</h1>
+
+  <div class="form-group">
+    <label>Team Name</label>
+    <input type="text" id="team-name" placeholder="e.g. Team Phoenix" />
+  </div>
+
+  <div class="form-group">
+    <label>Letter found</label>
+    <input type="text" id="letter" placeholder="1 letter" maxlength="1" />
+  </div>
+
+  <div class="form-group">
+    <label>Upload selfie with QR</label>
+    <input type="file" id="photo" accept="image/*" />
+  </div>
+
+  <button onclick="submitForm()">Submit</button>
+
+  <script>
+    function getLocationFromUrl() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const loc = urlParams.get("location");
+      return loc && /^[1-9]$/.test(loc) ? loc : "1";
+    }
+
+    async function submitForm() {
+      const teamName = document.getElementById("team-name").value.trim();
+      const letter = document.getElementById("letter").value.trim();
+      const photoFile = document.getElementById("photo").files[0];
+
+      if (!teamName || !letter || !photoFile) {
+        alert("Please fill team name, letter, and upload a selfie with QR");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = async function (e) {
+        const photoUrl = e.target.result; // data URL (or you can upload to Imgur later)
+
+        const payload = {
+          teamName,
+          location: getLocationFromUrl(),
+          letter: letter.toUpperCase(),
+          photoUrl,
+        };
+
+        const response = await fetch("https://script.google.com/a/macros/iiitdm.ac.in/s/AKfycbxzMUu7WbUV9UZo4hnUC0AG352WHDYAEECopnGpBaG9jT0AnciSZF5GzlUU6tWtaeK8/exec", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        if (response.ok) {
+          alert("Submitted successfully! ✅");
+        } else {
+          alert("Submit failed. Check console and your Web App URL");
+        }
+      };
+
+      reader.readAsDataURL(photoFile);
+    }
+
+    // Auto‑show we are on which location
+    window.onload = () => {
+      const loc = getLocationFromUrl();
+      document.title = `Treasure Hunt - Location ${loc}`;
+    };
+  </script>
+</body>
+</html>
